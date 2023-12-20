@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<flow name="createimplementationFlow" doc:id="baa4bb66-237a-4850-9884-64051513d7b3" >
+		<logger level="INFO" doc:name="start Logger" doc:id="c69e75a2-77ed-4cc8-b905-c10dd3719244" message="create implementationflow started"/>
+		<ee:transform doc:name="Transform Message for salesforce request" doc:id="53f9dad0-1f81-4cef-9d64-1a0ac8892c5a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[
+output application/java
+---
+payload map(item,index)-> {
+	"Description":item.description,
+	"ProductCode":item.product_code,
+	"IsActive":item.is_active,
+	"Family":item.family,
+	"Name":item.name
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create doc:id="db64f043-6133-44ae-be28-e3ad3c3d6152" config-ref="Salesforce_Config" type="Product2"/>
+		<ee:transform doc:name="Transform Message for salesforce response" doc:id="bf7a63da-71c9-433e-8ab0-f39abf5e0611" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "is_success": true,
+    "response": payload.items map (item, index) -> {
+        payload: item.payload
+    }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End Logger" doc:id="ee86adf2-4279-4246-96f5-89892a8e1287" message="create implementationflow compleated"/>
+	</flow>
+	<flow name="getAllimplementationFlow" doc:id="efc95d2e-9190-4f79-a91e-2d57da2d41d9" >
+		<logger level="INFO" doc:name="start Logger" doc:id="616defc1-dc0a-432c-b897-c6d64d6d71c3" message="get All implementation flow started"/>
+		<salesforce:query doc:name="Query" doc:id="4d44ac8b-42e7-43bf-af7c-7ec38fcc7b30" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[SELECT Id,Name,Description,ProductCode,IsActive,Family,LastModifiedDate FROM  Product2 WHERE LastModifiedDate >= :LastModifiedDate]]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	LastModifiedDate : attributes.queryParams.LastModifiedDate
+	
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message for getAll records in salesforce" doc:id="161e7e00-fd52-4144-ae7a-dc5f541645c3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map(item,index)->
+{
+	"description":item.Description,
+	"id":item.Id,
+	"is_active":item.IsActive,
+	"name":item.Name,
+	"product_code":item.ProductCode,
+	"family":item.Family,
+	"type":item."type",
+	"lastmodified_date":item.LastModifiedDate
+} 
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End Logger" doc:id="068fc25b-a284-4fdd-8c85-1227533f52eb" message="get All implementation flow compleated"/>
+	</flow>
+	<flow name="getByIdimplementationFlow" doc:id="5ecafde5-160a-4f51-9f3a-9652cbb2aee7" >
+		<logger level="INFO" doc:name="start Logger" doc:id="b4dee81e-556d-40c1-9ec4-05425db7922d" message="getById implementation flow started"/>
+		<set-variable value="#[attributes.uriParams.'id']" doc:name="Set Variable for store id" doc:id="2a6cb452-b0e9-4ab9-981c-93aa4b5b4e32" variableName="id" />
+		<salesforce:query doc:name="Query" doc:id="cf2cdd9c-a85d-464b-a308-c0ee597dbb77" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[SELECT Id,Name,Description,ProductCode,IsActive,Family FROM Product2 WHERE Id=':id']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.id
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message for getById in salesforce" doc:id="b5c187aa-7b8f-44d6-ba26-645320a03e3a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+ payload map (item, index) -> {
+    "description":item.Description,
+	"product_code":item.ProductCode,
+	"is_active":item.IsActive,
+	"family":item.Family,
+	"name":item.Name
+        
+    }
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End Logger" doc:id="3449a243-4846-47e2-8a51-ce4fbef975de" message="getById implementation flow compleated" />
+	</flow>
+	<flow name="putimplementationFlow" doc:id="db193503-ee76-4023-a8dd-d6007c6049be" >
+		<logger level="INFO" doc:name="startLogger" doc:id="f8721223-c1bd-49bb-9271-622c9fef3c30" message="put implementation start"/>
+		<set-variable value="#[attributes.uriParams.'id']" doc:name="Set Variable" doc:id="3593855f-496a-4854-94f3-ed0ae6d0b10c" variableName="id" />
+		<ee:transform doc:name="Transform Message" doc:id="2a6e70b1-027f-4eea-98fa-b763b3c8cf3c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map(item,index)->{
+	"Description":item.description,
+	"ProductCode":item.product_code,
+	"Id":vars.id,
+	"IsActive":item.is_active,
+	"Family":item.family,
+	"Name":item.name
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:update doc:name="Update" doc:id="ccf9b46a-7ae7-4993-8f4f-a3b518139297" config-ref="Salesforce_Config" type="Product2"/>
+		<ee:transform doc:name="Transform Message for delete response" doc:id="3b540dc0-1370-47ba-8501-9c68443d3fdf" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "is_success": true,
+    "response": payload.items map (item, index) -> {
+        payload: item.payload
+    }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End Logger" doc:id="49719ad3-fecd-476e-ab88-42f12740bd04" message="put implementation compleated"/>
+	</flow>
+	<flow name="deleteimplementationFlow" doc:id="6978a316-df22-4590-b2cc-835867738f4f" >
+		<logger level="INFO" doc:name="startLogger" doc:id="b0a6a059-4e4d-4283-80b4-637352826b4f" message="delete implementation flow start"/>
+		<set-variable value="#[attributes.uriParams.'id']" doc:name="Set Variable" doc:id="96625421-b7b0-4041-a83f-fbf4a4b3b617" variableName="id"/>
+		<salesforce:delete doc:name="Delete" doc:id="2ee07216-724a-4e42-8ae8-5a700ae77534" config-ref="Salesforce_Config">
+			<salesforce:ids ><![CDATA[#[[vars.id]]]]></salesforce:ids>
+		</salesforce:delete>
+		<ee:transform doc:name="Transform Message for delete response" doc:id="93dd6568-a26e-419f-bb78-916ff225fe19" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "is_success": true,
+    "response": payload.items map (item, index) -> {
+        payload: item.payload
+    }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End Logger" doc:id="7744c0b3-6799-4799-9ec0-fa1437fbcbf4" message="delete implementation flow compleated"/>
+	</flow>
+</mule>

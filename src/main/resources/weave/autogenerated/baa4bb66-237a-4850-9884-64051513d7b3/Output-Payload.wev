@@ -1,0 +1,9 @@
+%dw 2.0
+
+type auto_baa4bb66_237a_4850_9884_64051513d7b3_Output_Payload = {
+  id: String, 
+  is_success: Boolean, 
+  errors: Array<{    error_message: String,     error_code: Number,     _?: Any  }>, 
+  _?: Any
+}
+

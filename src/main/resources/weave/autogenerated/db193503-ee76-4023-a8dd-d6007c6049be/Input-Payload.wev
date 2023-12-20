@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_db193503_ee76_4023_a8dd_d6007c6049be_Input_Payload = Array<{  is_active: Boolean,   name: String,   description: String,   product_code: String,   family: String,   _?: Any}>
+

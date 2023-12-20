@@ -1,0 +1,13 @@
+%dw 2.0
+
+type auto_5ecafde5_160a_4f51_9f3a_9652cbb2aee7_Output_Payload = {
+  is_active: Boolean, 
+  name: String, 
+  description: String, 
+  id: String, 
+  product_code: String, 
+  family: String, 
+  "type": String, 
+  _?: Any
+}
+
